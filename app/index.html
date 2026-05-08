@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>VibeRec — Music for Every Moment</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#121212;--dark:#181818;--card:#282828;--hover:#3E3E3E;
+  --blue:#3B82F6;--blue-dark:#2563EB;--blue-glow:#1D4ED8;--white:#fff;
+  --gray:#B3B3B3;--lgray:#535353;--font:'DM Sans',sans-serif;
+}
+body{background:var(--black);color:var(--white);font-family:var(--font);min-height:100vh}
+
+/* NAV */
+.nav{background:linear-gradient(180deg,#000,rgba(0,0,0,.7));padding:14px 24px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:8px;font-size:19px;font-weight:600}
+.logo svg{width:32px;height:32px}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.greeting{font-size:13px;color:var(--gray)}
+.server-dot{width:8px;height:8px;border-radius:50%;background:#555;flex-shrink:0;transition:background .3s}
+.server-dot.ok{background:var(--blue)}
+.server-dot.err{background:#e74c3c}
+.now-mini{display:none;align-items:center;gap:8px;background:rgba(255,255,255,.06);border-radius:40px;padding:5px 12px 5px 5px}
+.mini-art{width:28px;height:28px;border-radius:4px}
+.mini-info{font-size:11px}
+.mini-title{color:var(--white);font-weight:500}
+.mini-artist{color:var(--gray)}
+
+/* HERO */
+.hero{padding:22px 24px 0;background:linear-gradient(180deg,#0f172a,var(--black))}
+.hero h1{font-size:27px;font-weight:600;margin-bottom:3px}
+.hero-sub{font-size:13px;color:var(--gray);margin-bottom:18px}
+.ctx-card{background:var(--card);border-radius:12px;padding:18px;margin-bottom:20px}
+.vibe-row{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap}
+.pill{font-size:12px;padding:5px 13px;border-radius:40px;border:1px solid var(--lgray);color:var(--gray);cursor:pointer;transition:all .15s;background:transparent}
+.pill.active{background:var(--blue);color:#000;border-color:var(--blue);font-weight:500}
+.ctx-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.ctx-block label{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;display:block}
+select{width:100%;background:var(--hover);color:var(--white);border:1px solid var(--lgray);border-radius:8px;padding:9px 11px;font-size:13px;font-family:var(--font);cursor:pointer;appearance:none}
+select:focus{outline:2px solid var(--blue);border-color:transparent}
+select option{background:var(--card)}
+.go-btn{width:100%;background:var(--blue);color:#000;border:none;border-radius:40px;padding:13px;font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;transition:all .15s}
+.go-btn:hover{background:var(--blue-dark);transform:scale(1.01)}
+.go-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* LOADING */
+.loading{display:none;text-align:center;padding:40px;color:var(--gray);font-size:14px}
+.loading.show{display:block}
+.spinner{width:30px;height:30px;border:3px solid var(--hover);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ERROR */
+.error-box{background:#151a2a;border:1px solid #203070;border-radius:10px;padding:16px;margin:0 24px 20px;font-size:13px;color:#80a8f0;display:none}
+.error-box.show{display:block}
+
+/* FEATURED */
+.featured{background:linear-gradient(135deg,#1e3a5f,#0d1b35);border-radius:12px;padding:18px;display:flex;gap:16px;align-items:center;margin:0 24px 20px;cursor:pointer;position:relative;overflow:hidden;transition:background .2s}
+.featured:hover{background:linear-gradient(135deg,#1e4a7a,#0d2244)}
+.feat-art{width:96px;height:96px;border-radius:8px;flex-shrink:0;box-shadow:0 6px 20px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:36px}
+.feat-label{font-size:10px;color:var(--blue);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:5px}
+.feat-title{font-size:20px;font-weight:600;margin-bottom:3px;line-height:1.2}
+.feat-artist{font-size:13px;color:var(--gray);margin-bottom:8px}
+.feat-genre{font-size:11px;color:var(--gray);margin-bottom:6px}
+.feat-why{font-size:12px;color:rgba(255,255,255,.55);line-height:1.5;max-width:320px}
+.feat-badge{position:absolute;top:12px;right:12px;background:var(--blue);color:#000;font-size:11px;font-weight:600;padding:3px 9px;border-radius:40px}
+.play-btn{width:42px;height:42px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;flex-shrink:0;transition:transform .15s}
+.play-btn:hover{transform:scale(1.08)}
+.play-btn svg{fill:#000;width:16px;height:16px;margin-left:2px}
+
+/* AUDIO BARS */
+.audio-viz{padding:0 24px 18px}
+.audio-viz-title{font-size:13px;color:var(--gray);margin-bottom:8px}
+.feat-bars{display:flex;flex-direction:column;gap:7px}
+.feat-row{display:flex;align-items:center;gap:10px}
+.feat-lbl{font-size:11px;color:var(--gray);width:90px;text-align:right;flex-shrink:0}
+.bar-bg{flex:1;height:4px;background:var(--hover);border-radius:2px;overflow:hidden}
+.bar-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .5s ease}
+.bar-val{font-size:11px;color:var(--gray);width:26px;text-align:right}
+
+/* CARDS SCROLL */
+.sec{padding:14px 24px 0}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.sec-title{font-size:19px;font-weight:600}
+.sec-link{font-size:12px;color:var(--gray);cursor:pointer;text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+.cards{display:flex;gap:12px;overflow-x:auto;padding:0 24px 14px;scrollbar-width:none}
+.cards::-webkit-scrollbar{display:none}
+.tcard{background:var(--card);border-radius:10px;padding:12px;width:152px;flex-shrink:0;cursor:pointer;transition:background .15s}
+.tcard:hover{background:var(--hover)}
+.tcard-art{width:128px;height:128px;border-radius:6px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;font-size:40px}
+.tcard-title{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.tcard-artist{font-size:11px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tcard-match{font-size:11px;color:var(--blue);margin-top:5px;font-weight:500}
+
+/* TRACK LIST */
+.tlist{padding:0 24px 18px}
+.trow{display:flex;align-items:center;gap:12px;padding:7px 8px;border-radius:6px;cursor:pointer;transition:background .15s}
+.trow:hover{background:var(--card)}
+.trow-num{font-size:13px;color:var(--gray);width:14px;text-align:center;flex-shrink:0}
+.trow-art{width:38px;height:38px;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px}
+.trow-info{flex:1;min-width:0}
+.trow-title{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trow-artist{font-size:11px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trow-match{font-size:12px;color:var(--blue);flex-shrink:0}
+.trow-dur{font-size:11px;color:var(--gray);flex-shrink:0;width:34px;text-align:right}
+
+/* CL PANEL */
+.cl-panel{margin:0 24px 20px;background:var(--card);border-radius:12px;padding:16px}
+.cl-title{font-size:13px;font-weight:600;color:var(--blue);margin-bottom:10px}
+.cl-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.cl-stat{background:var(--hover);border-radius:8px;padding:9px;text-align:center}
+.cl-val{font-size:19px;font-weight:600;color:var(--blue)}
+.cl-lbl{font-size:11px;color:var(--gray);margin-top:2px}
+.cl-hist{font-size:12px;color:var(--gray);line-height:1.6}
+.cl-tag{display:inline-block;background:rgba(59,130,246,.15);color:var(--blue);border-radius:4px;padding:2px 6px;font-size:11px;margin:2px}
+
+/* GENRE */
+.genre-sec{padding:0 24px 24px}
+.genre-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px}
+.gchip{border-radius:8px;padding:14px 12px;cursor:pointer;font-size:12px;font-weight:600;min-height:64px;display:flex;align-items:flex-end;transition:opacity .15s}
+.gchip:hover{opacity:.82}
+
+/* EMPTY */
+.empty{text-align:center;padding:44px 24px;color:var(--gray)}
+.empty-icon{font-size:44px;margin-bottom:10px}
+.empty-text{font-size:13px;line-height:1.7}
+.footer-space{height:28px}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="logo">
+    <svg viewBox="0 0 36 36" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="36" height="36" rx="10" fill="#3B82F6"/>
+      <rect x="7" y="20" width="4" height="10" rx="2" fill="white"/>
+      <rect x="13" y="13" width="4" height="17" rx="2" fill="white"/>
+      <rect x="19" y="8" width="4" height="22" rx="2" fill="white"/>
+      <rect x="25" y="15" width="4" height="15" rx="2" fill="white"/>
+      <circle cx="9" cy="17" r="2.5" fill="#93C5FD"/>
+      <circle cx="15" cy="10" r="2.5" fill="#93C5FD"/>
+      <circle cx="21" cy="5" r="2.5" fill="#93C5FD"/>
+      <circle cx="27" cy="12" r="2.5" fill="#93C5FD"/>
+    </svg>
+    VibeRec
+  </div>
+  <div class="nav-right">
+    <span class="greeting" id="greeting">Good morning</span>
+    <div title="Server status" class="server-dot" id="serverDot"></div>
+    <div class="now-mini" id="nowMini">
+      <div class="mini-art" id="miniArt" style="background:#1e3a5f;display:flex;align-items:center;justify-content:center;font-size:14px">🎵</div>
+      <div class="mini-info">
+        <div class="mini-title" id="miniTitle">—</div>
+        <div class="mini-artist" id="miniArtist">—</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO / INPUT -->
+<div class="hero">
+  <h1 id="heroTitle">What's the vibe?</h1>
+  <p class="hero-sub">Tell us the moment — we'll find the music from 114k real tracks.</p>
+  <div class="ctx-card">
+    <div class="vibe-row" id="pills">
+      <span class="pill" data-v="focus">Focus</span>
+      <span class="pill" data-v="pump">Pump Up</span>
+      <span class="pill" data-v="chill">Chill</span>
+      <span class="pill" data-v="commute">Commute</span>
+      <span class="pill" data-v="social">Social</span>
+      <span class="pill" data-v="sad">Sad Hours</span>
+      <span class="pill" data-v="sleep">Wind Down</span>
+    </div>
+    <div class="ctx-grid">
+      <div class="ctx-block"><label>Activity</label>
+        <select id="activity">
+          <option value="workout">Workout</option>
+          <option value="commute">Commute</option>
+          <option value="work" selected>Work / Study</option>
+          <option value="leisure">Leisure</option>
+          <option value="sleep">Sleep / Wind Down</option>
+          <option value="social">Social / Party</option>
+          <option value="cooking">Cooking</option>
+          <option value="running">Running</option>
+        </select>
+      </div>
+      <div class="ctx-block"><label>Time of Day</label>
+        <select id="timeofday">
+          <option value="morning">Morning (6am–12pm)</option>
+          <option value="afternoon">Afternoon (12–6pm)</option>
+          <option value="evening">Evening (6–10pm)</option>
+          <option value="night">Late Night (10pm+)</option>
+        </select>
+      </div>
+      <div class="ctx-block"><label>Mood</label>
+        <select id="mood">
+          <option value="happy">Happy / Upbeat</option>
+          <option value="calm">Calm / Focused</option>
+          <option value="energetic">Energetic / Hyped</option>
+          <option value="melancholic">Melancholic / Reflective</option>
+          <option value="romantic">Romantic</option>
+        </select>
+      </div>
+      <div class="ctx-block"><label>Genre</label>
+        <select id="genre">
+          <option value="any">Any Genre</option>
+          <option value="pop">Pop</option>
+          <option value="hip-hop">Hip-Hop / Rap</option>
+          <option value="rock">Rock</option>
+          <option value="electronic">Electronic / EDM</option>
+          <option value="r-b">R&amp;B / Soul</option>
+          <option value="classical">Classical</option>
+          <option value="jazz">Jazz</option>
+          <option value="indie">Indie / Alternative</option>
+          <option value="latin">Latin</option>
+        </select>
+      </div>
+    </div>
+    <button class="go-btn" id="goBtn" onclick="getRecs()">Find My Vibe →</button>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <div id="loadTxt">Connecting to model...</div>
+</div>
+
+<!-- ERROR -->
+<div class="error-box" id="errBox">
+  <strong>⚠ Cannot reach server</strong><br>
+  Make sure the Python server is running: <code>python run.py</code><br>
+  Then refresh this page.
+</div>
+
+<!-- RESULTS -->
+<div id="results" style="display:none">
+
+  <div class="featured" id="featCard" onclick="play(0)">
+    <div class="feat-art" id="featArt">🎵</div>
+    <div style="flex:1;min-width:0">
+      <div class="feat-label">Perfect match for your vibe</div>
+      <div class="feat-title" id="featTitle">—</div>
+      <div class="feat-artist" id="featArtist">—</div>
+      <div class="feat-genre" id="featGenre">—</div>
+      <div class="feat-why" id="featWhy">—</div>
+    </div>
+    <button class="play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+    <div class="feat-badge" id="featBadge">—</div>
+  </div>
+
+  <div class="audio-viz">
+    <div class="audio-viz-title">Track audio profile (real Spotify data)</div>
+    <div class="feat-bars" id="featBars"></div>
+  </div>
+
+  <div class="sec"><div class="sec-head">
+    <span class="sec-title">More for your vibe</span>
+    <span class="sec-link">See all</span>
+  </div></div>
+  <div class="cards" id="cards"></div>
+
+  <div class="sec"><div class="sec-head">
+    <span class="sec-title" id="listTitle">Top picks</span>
+  </div></div>
+  <div class="tlist" id="tlist"></div>
+
+  <div class="cl-panel">
+    <div class="cl-title">Continual Learning — Live Session State</div>
+    <div class="cl-stats">
+      <div class="cl-stat"><div class="cl-val" id="clS">0</div><div class="cl-lbl">Sessions</div></div>
+      <div class="cl-stat"><div class="cl-val" id="clT">0</div><div class="cl-lbl">Tracks</div></div>
+      <div class="cl-stat"><div class="cl-val" id="clD">—</div><div class="cl-lbl">Drift</div></div>
+    </div>
+    <div class="cl-hist" id="clHist">No history yet. Your taste profile builds as you explore.</div>
+  </div>
+
+  <div class="genre-sec">
+    <div class="sec-head" style="margin-bottom:10px;padding:0">
+      <span class="sec-title">Browse by genre</span>
+    </div>
+    <div class="genre-grid" id="genreGrid"></div>
+  </div>
+
+</div>
+
+<!-- EMPTY -->
+<div class="empty" id="empty">
+  <div class="empty-icon">🎧</div>
+  <div class="empty-text">Set your context above and hit <strong>Find My Vibe</strong><br>to get real recommendations from 114k Spotify tracks.</div>
+</div>
+
+<div class="footer-space"></div>
+
+<script>
+const API = "http://localhost:5000";
+let currentTracks = [];
+
+const VIBE_PRESETS = {
+  focus:   {activity:"work",    mood:"calm"},
+  pump:    {activity:"workout", mood:"energetic"},
+  chill:   {activity:"leisure", mood:"calm"},
+  commute: {activity:"commute", mood:"happy"},
+  social:  {activity:"social",  mood:"happy"},
+  sad:     {activity:"leisure", mood:"melancholic"},
+  sleep:   {activity:"sleep",   mood:"calm"},
+};
+const GENRES_META = [
+  {name:"Pop",       key:"pop",       bg:"#e91e63",fg:"#fff"},
+  {name:"Hip-Hop",   key:"hip-hop",   bg:"#ff6f00",fg:"#fff"},
+  {name:"R&B",       key:"r-b",       bg:"#795548",fg:"#fff"},
+  {name:"Rock",      key:"rock",      bg:"#b71c1c",fg:"#fff"},
+  {name:"Indie",     key:"indie",     bg:"#1565c0",fg:"#fff"},
+  {name:"Electronic",key:"electronic",bg:"#7c4dff",fg:"#fff"},
+  {name:"Classical", key:"classical", bg:"#546e7a",fg:"#fff"},
+  {name:"Latin",     key:"latin",     bg:"#f9a825",fg:"#000"},
+];
+
+// Genre → emoji for art placeholder
+const GENRE_EMOJI = {
+  pop:"🎤",rock:"🎸","hip-hop":"🎤",electronic:"🎛",rnb:"🎵",
+  jazz:"🎷",classical:"🎹",indie:"🎸",latin:"💃",default:"🎵"
+};
+function emoji(genre) {
+  const g = (genre||"").toLowerCase();
+  for (const k in GENRE_EMOJI) if (g.includes(k)) return GENRE_EMOJI[k];
+  return GENRE_EMOJI.default;
+}
+
+// Gradient backgrounds based on genre
+const GRADIENTS = [
+  "linear-gradient(135deg,#c62828,#880e4f)",
+  "linear-gradient(135deg,#1565c0,#6a1b9a)",
+  "linear-gradient(135deg,#212121,#37474f)",
+  "linear-gradient(135deg,#1b5e20,#212121)",
+  "linear-gradient(135deg,#bf360c,#212121)",
+  "linear-gradient(135deg,#880e4f,#311b92)",
+  "linear-gradient(135deg,#0d47a1,#006064)",
+  "linear-gradient(135deg,#e65100,#f9a825)",
+  "linear-gradient(135deg,#4a148c,#880e4f)",
+  "linear-gradient(135deg,#37474f,#78909c)",
+];
+function grad(idx) { return GRADIENTS[idx % GRADIENTS.length]; }
+
+function fmtDur(ms) {
+  if (!ms) return "—";
+  const s = Math.round(ms/1000);
+  return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+}
+
+function whyText(t, act) {
+  const parts = [];
+  if (t.energy > .75)      parts.push("high energy");
+  else if (t.energy < .35) parts.push("calm, low-key energy");
+  if (t.danceability > .75) parts.push("danceable rhythm");
+  if (t.valence > .75)      parts.push("uplifting positivity");
+  else if (t.valence < .30) parts.push("deep emotional tone");
+  if (t.acousticness > .60) parts.push("rich acoustics");
+  if (t.instrumentalness > .50) parts.push("instrumental focus");
+  if (!parts.length) parts.push("balanced audio profile");
+  return `Matched for ${act} · ${parts.slice(0,2).join(" & ")}.`;
+}
+
+function renderBars(t) {
+  const feats = [
+    {l:"Danceability", v:t.danceability},
+    {l:"Energy",       v:t.energy},
+    {l:"Valence",      v:t.valence},
+    {l:"Acousticness", v:t.acousticness},
+    {l:"Speechiness",  v:t.speechiness},
+    {l:"Instrumental", v:t.instrumentalness},
+  ];
+  document.getElementById("featBars").innerHTML = feats.map(f=>`
+    <div class="feat-row">
+      <span class="feat-lbl">${f.l}</span>
+      <div class="bar-bg"><div class="bar-fill" style="width:${Math.round((f.v||0)*100)}%"></div></div>
+      <span class="bar-val">${Math.round((f.v||0)*100)}%</span>
+    </div>`).join("");
+}
+
+function renderCard(t, idx) {
+  return `<div class="tcard" onclick="play(${idx})">
+    <div class="tcard-art" style="background:${grad(idx)}">${emoji(t.track_genre)}</div>
+    <div class="tcard-title">${t.track_name}</div>
+    <div class="tcard-artist">${t.artists}</div>
+    <div class="tcard-match">${t.match_pct}% match</div>
+  </div>`;
+}
+
+function renderRow(t, idx) {
+  return `<div class="trow" onclick="play(${idx})">
+    <span class="trow-num">${idx+1}</span>
+    <div class="trow-art" style="background:${grad(idx)}">${emoji(t.track_genre)}</div>
+    <div class="trow-info">
+      <div class="trow-title">${t.track_name}</div>
+      <div class="trow-artist">${t.artists}</div>
+    </div>
+    <span class="trow-match">${t.match_pct}%</span>
+    <span class="trow-dur">${fmtDur(t.duration_ms)}</span>
+  </div>`;
+}
+
+function play(idx) {
+  const t = currentTracks[idx];
+  if (!t) return;
+  document.getElementById("miniTitle").textContent  = t.track_name;
+  document.getElementById("miniArtist").textContent = t.artists;
+  document.getElementById("miniArt").style.background = grad(idx);
+  document.getElementById("miniArt").textContent = emoji(t.track_genre);
+  document.getElementById("nowMini").style.display = "flex";
+  if (idx === 0) renderBars(t);
+}
+
+function renderCL(cl) {
+  document.getElementById("clS").textContent = cl.sessions;
+  document.getElementById("clT").textContent = cl.tracks_heard;
+  document.getElementById("clD").textContent = cl.drift_label || "—";
+  const hist = cl.history || [];
+  if (hist.length === 0) return;
+  document.getElementById("clHist").innerHTML =
+    "<strong style='color:#fff;font-size:12px'>Recent sessions:</strong><br>" +
+    [...hist].reverse().slice(0,5).map(h=>
+      `<span class="cl-tag">${h.context?.activity||""} · ${h.context?.mood||""}</span> → <em>${h.track}</em>`
+    ).join("<br>");
+}
+
+async function getRecs() {
+  const btn = document.getElementById("goBtn");
+  btn.disabled = true;
+  document.getElementById("empty").style.display   = "none";
+  document.getElementById("results").style.display = "none";
+  document.getElementById("errBox").classList.remove("show");
+  document.getElementById("loading").classList.add("show");
+
+  const msgs = ["Querying 114k tracks...","Scoring audio features...","Applying continual learning...","Building your playlist..."];
+  let mi = 0;
+  const iv = setInterval(()=>{mi=(mi+1)%msgs.length;document.getElementById("loadTxt").textContent=msgs[mi];},800);
+
+  const act  = document.getElementById("activity").value;
+  const tod  = document.getElementById("timeofday").value;
+  const mood = document.getElementById("mood").value;
+  const genre= document.getElementById("genre").value;
+
+  try {
+    const res = await fetch(`${API}/recommend`, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        activity: act, time_slot: tod, mood, genre,
+        weekday: new Date().getDay() > 0 && new Date().getDay() < 6 ? 1 : 0,
+        top_k: 20,
+      })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    clearInterval(iv);
+    document.getElementById("loading").classList.remove("show");
+    btn.disabled = false;
+
+    const tracks = data.tracks || [];
+    if (!tracks.length) throw new Error("No tracks returned");
+    currentTracks = tracks;
+
+    const best = tracks[0];
+    document.getElementById("featArt").style.background = grad(0);
+    document.getElementById("featArt").textContent = emoji(best.track_genre);
+    document.getElementById("featTitle").textContent  = best.track_name;
+    document.getElementById("featArtist").textContent = best.artists;
+    document.getElementById("featGenre").textContent  = best.track_genre || "";
+    document.getElementById("featWhy").textContent    = whyText(best, act);
+    document.getElementById("featBadge").textContent  = `${best.match_pct}% match`;
+    renderBars(best);
+
+    document.getElementById("cards").innerHTML =
+      tracks.slice(1,7).map((t,i)=>renderCard(t,i+1)).join("");
+    document.getElementById("listTitle").textContent = `All picks for ${act.replace("_"," ")}`;
+    document.getElementById("tlist").innerHTML =
+      tracks.slice(0,10).map((t,i)=>renderRow(t,i)).join("");
+
+    document.getElementById("genreGrid").innerHTML = GENRES_META.map(gm=>`
+      <div class="gchip" style="background:${gm.bg};color:${gm.fg}" onclick="filterGenre('${gm.key}')">
+        ${gm.name}
+      </div>`).join("");
+
+    if (data.cl_state) renderCL(data.cl_state);
+
+    document.getElementById("results").style.display = "block";
+    document.getElementById("results").scrollIntoView({behavior:"smooth"});
+
+  } catch(err) {
+    clearInterval(iv);
+    document.getElementById("loading").classList.remove("show");
+    document.getElementById("errBox").classList.add("show");
+    document.getElementById("empty").style.display = "block";
+    btn.disabled = false;
+    console.error(err);
+  }
+}
+
+function filterGenre(key) {
+  document.getElementById("genre").value = key;
+  getRecs();
+}
+
+// Vibe pills
+document.querySelectorAll(".pill").forEach(p=>{
+  p.addEventListener("click",()=>{
+    document.querySelectorAll(".pill").forEach(x=>x.classList.remove("active"));
+    p.classList.add("active");
+    const pr = VIBE_PRESETS[p.dataset.v];
+    if (pr) {
+      if (pr.activity) document.getElementById("activity").value = pr.activity;
+      if (pr.mood)     document.getElementById("mood").value     = pr.mood;
+    }
+  });
+});
+
+// Server status check
+async function checkServer() {
+  try {
+    const r = await fetch(`${API}/status`);
+    const d = await r.json();
+    const dot = document.getElementById("serverDot");
+    dot.classList.add("ok");
+    dot.title = `Server online · ${d.n_tracks?.toLocaleString()} tracks · model: ${d.model_loaded?"loaded":"audio scoring"}`;
+  } catch {
+    document.getElementById("serverDot").classList.add("err");
+    document.getElementById("serverDot").title = "Server offline — run: python run.py";
+  }
+}
+
+// Auto-detect time
+const h = new Date().getHours();
+document.getElementById("greeting").textContent = h<12?"Good morning":h<18?"Good afternoon":"Good evening";
+document.getElementById("timeofday").value = h<6?"night":h<12?"morning":h<18?"afternoon":h<22?"evening":"night";
+
+checkServer();
+</script>
+</body>
+</html>

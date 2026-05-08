@@ -1,0 +1,32 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../continual"
+		},
+		{
+			"path": "../data"
+		},
+		{
+			"path": "../datasets"
+		},
+		{
+			"path": "../evaluation"
+		},
+		{
+			"path": "../models"
+		},
+		{
+			"path": "../synthetic"
+		},
+		{
+			"path": "../training"
+		},
+		{
+			"path": "../utils"
+		}
+	],
+	"settings": {}
+}
