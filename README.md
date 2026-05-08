@@ -1,4 +1,4 @@
-# VibeRec — Fully Connected Continual Music Recommender
+# VibeRec — Continual Learning Music Recommender
 
 The Spotify-like frontend is now fully connected to the PyTorch
 continual learning backend via a Flask API.
@@ -37,6 +37,10 @@ Then open `app/index.html` in your browser.
 ### Quick test (fast, small data)
 ```bash
 python run.py --quick
+```
+### Full test (relatively slower, large data) 
+```bash
+python run.py
 ```
 
 ### Skip training (if model already trained)
