@@ -99,6 +99,7 @@ Frontend renders:
 ## Model Algorithm/Workflow
 
 Model Architecture 
+
 1 Overview of VibeRec System 
 
 The VibeRec system is a context-aware, audio-augmented, and dual-memory recommendation system designed for continual learning in music recommendation tasks. The key challenge addressed by this system is that music preferences are highly contextual, continuously evolving, and non-stationary over time. In order to address this, the model integrates four main components, which are dual-memory user representation, context-aware embedding learning, audio feature integration with tags from the dataset, and continual learning through elastic weight consolidation (EWC) and replay buffer. The system is trained using BPR loss and combined with continual learning. 
