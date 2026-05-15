@@ -1,7 +1,3 @@
-
-
-https://github.com/user-attachments/assets/c0862391-e646-45d6-af57-f7b9822b46d6
-
 # VibeRec — Continual Learning Music Recommender
 
 The Spotify-like frontend is now fully connected to the PyTorch
@@ -144,4 +140,6 @@ negative sampling, supports implicit feedback learning
 EWC prevents catastrophic forgetting by penalized changes to important parameters, LEWC​=∑i​Fi​(θi​−θi∗​)2 where Fi = Fisher Information (importance) and θi = previous optimal parameters 
 Replay Buffer stores the past interactions such as user, item, time, etc. The loss function is defined as LReplay​=−logσ(y^​ui​−y^​uj​). The replay is balanced across activity and mood. 
 
+# Demo Video 
 
+https://github.com/user-attachments/assets/c0862391-e646-45d6-af57-f7b9822b46d6
