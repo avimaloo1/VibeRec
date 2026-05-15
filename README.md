@@ -1,3 +1,7 @@
+
+
+https://github.com/user-attachments/assets/c0862391-e646-45d6-af57-f7b9822b46d6
+
 # VibeRec — Continual Learning Music Recommender
 
 The Spotify-like frontend is now fully connected to the PyTorch
